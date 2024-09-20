@@ -1,0 +1,4 @@
+//This is the file that is used to specify private data that should no be uploaded on git
+
+#define WIFI_SSID "<---WIFI-NAME--->"
+#define WIFI_PASSWORD "<---WIFI-PASSWROD--->"
