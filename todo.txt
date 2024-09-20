@@ -1,5 +1,6 @@
-* Copy the files of the first success run and make sure it works
+*DONE* Copy the files of the first success run and make sure it works
 * Upload the stuff on github
+* Impelement the webserver GET entry (Turn an LED on and off using curl or something...)
 * Get the GPIO running & find out how many free IO ports we can use to drive the motors
 * Make the electronics ready
 * Design and make a 3D printed body for the tank

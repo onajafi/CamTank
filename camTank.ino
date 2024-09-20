@@ -84,7 +84,24 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   server.on("/", []() {
-    server.send(200, "text/plain", "Hi! This is ElegantOTA Demo.");
+    server.send(200, "text/plain", "Hi! This is camTank. github.com/onajafi");
+  });
+
+  pinMode(LED_PIN, OUTPUT);
+
+  digitalWrite(LED_PIN, HIGH);
+  delay(500);
+  digitalWrite(LED_PIN, LOW);
+  delay(500);
+
+  server.on("/led/on", []() {
+    digitalWrite(LED_PIN, HIGH);
+    server.send(200);
+  });
+
+  server.on("/led/off", []() {
+    digitalWrite(LED_PIN, LOW);
+    server.send(200);
   });
 
   ElegantOTA.begin(&server);    // Start ElegantOTA
@@ -102,38 +119,38 @@ void setup() {
     delay(10);
   }
 
-  // Setup timer with given frequency, resolution and attach it to a led pin with auto-selected channel
-  ledcAttach(LED_PIN, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  // // Setup timer with given frequency, resolution and attach it to a led pin with auto-selected channel
+  // ledcAttach(LED_PIN, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
 
   // Setup and start fade on led (duty from 0 to 4095)
-  ledcFade(LED_PIN, LEDC_START_DUTY, LEDC_TARGET_DUTY, LEDC_FADE_TIME);
-  Serial.println("LED Fade on started.");
+  // ledcFade(LED_PIN, LEDC_START_DUTY, LEDC_TARGET_DUTY, LEDC_FADE_TIME);
+  // Serial.println("LED Fade on started.");
 
-  // Wait for fade to end
-  delay(LEDC_FADE_TIME);
+  // // Wait for fade to end
+  // delay(LEDC_FADE_TIME);
 
-  // Setup and start fade off led and use ISR (duty from 4095 to 0)
-  ledcFadeWithInterrupt(LED_PIN, LEDC_TARGET_DUTY, LEDC_START_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
-  Serial.println("LED Fade off started.");
+  // // Setup and start fade off led and use ISR (duty from 4095 to 0)
+  // ledcFadeWithInterrupt(LED_PIN, LEDC_TARGET_DUTY, LEDC_START_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
+  // Serial.println("LED Fade off started.");
 }
 
 void loop() {
   // Check if fade_ended flag was set to true in ISR
-  if (fade_ended) {
-    Serial.println("LED fade ended");
-    fade_ended = false;
+  // if (fade_ended) {
+  //   Serial.println("LED fade ended");
+  //   fade_ended = false;
 
-    // Check if last fade was fade on
-    if (fade_on) {
-      ledcFadeWithInterrupt(LED_PIN, LEDC_START_DUTY, LEDC_TARGET_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
-      Serial.println("LED Fade off started.");
-      fade_on = false;
-    } else {
-      ledcFadeWithInterrupt(LED_PIN, LEDC_TARGET_DUTY, LEDC_START_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
-      Serial.println("LED Fade on started.");
-      fade_on = true;
-    }
-  }
+  //   // Check if last fade was fade on
+  //   if (fade_on) {
+  //     ledcFadeWithInterrupt(LED_PIN, LEDC_START_DUTY, LEDC_TARGET_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
+  //     Serial.println("LED Fade off started.");
+  //     fade_on = false;
+  //   } else {
+  //     ledcFadeWithInterrupt(LED_PIN, LEDC_TARGET_DUTY, LEDC_START_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
+  //     Serial.println("LED Fade on started.");
+  //     fade_on = true;
+  //   }
+  // }
   server.handleClient();
   ElegantOTA.loop();
 }
