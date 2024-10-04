@@ -53,11 +53,17 @@ void onOTAEnd(bool success) {
 
 // fade LED PIN (replace with LED_BUILTIN constant for built-in LED)
 #define LED_PIN 4
+#define IO_PIN_12 12
+#define IO_PIN_13 13
+#define IO_PIN_14 14
+#define IO_PIN_15 15
+#define MAX_MOTOR_PWM 1023
 
 // define starting duty, target duty and maximum fade time
 #define LEDC_START_DUTY  (0)
 #define LEDC_TARGET_DUTY (8)
 #define LEDC_FADE_TIME   (100)
+#define LEDC_MAX_LIGHT   (2)
 
 bool fade_ended = false;  // status of LED fade
 bool fade_on = true;
@@ -88,20 +94,50 @@ void setup() {
   });
 
   pinMode(LED_PIN, OUTPUT);
+  pinMode(IO_PIN_12, OUTPUT);
+  pinMode(IO_PIN_13, OUTPUT);
+  pinMode(IO_PIN_14, OUTPUT);
+  pinMode(IO_PIN_15, OUTPUT);
 
-  digitalWrite(LED_PIN, HIGH);
+  analogWrite(LED_PIN, LEDC_MAX_LIGHT);
   delay(500);
-  digitalWrite(LED_PIN, LOW);
+  analogWrite(LED_PIN, 0);
   delay(500);
 
   server.on("/led/on", []() {
-    digitalWrite(LED_PIN, HIGH);
+    analogWrite(LED_PIN, LEDC_MAX_LIGHT);
+    digitalWrite(IO_PIN_12, HIGH);
+    digitalWrite(IO_PIN_13, HIGH);
+    digitalWrite(IO_PIN_14, HIGH);
+    digitalWrite(IO_PIN_15, HIGH);
     server.send(200);
   });
 
   server.on("/led/off", []() {
-    digitalWrite(LED_PIN, LOW);
+    analogWrite(LED_PIN, 0);
+    digitalWrite(IO_PIN_12, LOW);
+    digitalWrite(IO_PIN_13, LOW);
+    digitalWrite(IO_PIN_14, LOW);
+    digitalWrite(IO_PIN_15, LOW);
     server.send(200);
+  });
+
+  server.on("/motor/left", []() {
+    if(server.args() == 0){
+      server.send(400, "text/plain", "Please provide 'power' from 0 to " + String(MAX_MOTOR_PWM) +"\n");
+    }
+    int power = 0;
+    for(int i=0; i<server.args(); i++){
+      if(server.argName(i) == "power"){
+        power = server.arg(i).toInt();
+        power = power>MAX_MOTOR_PWM? MAX_MOTOR_PWM : power;
+        power = power<0? 0 : power;
+      }
+    }
+    // analogWrite(LED_PIN, 0);
+    analogWrite(IO_PIN_12, power);
+    server.send(200, "text/plain", "power set to " + String(power) + "\n");
+    
   });
 
   ElegantOTA.begin(&server);    // Start ElegantOTA
@@ -136,21 +172,21 @@ void setup() {
 
 void loop() {
   // Check if fade_ended flag was set to true in ISR
-  // if (fade_ended) {
-  //   Serial.println("LED fade ended");
-  //   fade_ended = false;
+  if (fade_ended) {
+    // Serial.println("LED fade ended");
+    fade_ended = false;
 
-  //   // Check if last fade was fade on
-  //   if (fade_on) {
-  //     ledcFadeWithInterrupt(LED_PIN, LEDC_START_DUTY, LEDC_TARGET_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
-  //     Serial.println("LED Fade off started.");
-  //     fade_on = false;
-  //   } else {
-  //     ledcFadeWithInterrupt(LED_PIN, LEDC_TARGET_DUTY, LEDC_START_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
-  //     Serial.println("LED Fade on started.");
-  //     fade_on = true;
-  //   }
-  // }
+    // Check if last fade was fade on
+    if (fade_on) {
+      ledcFadeWithInterrupt(LED_PIN, LEDC_START_DUTY, LEDC_TARGET_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
+      // Serial.println("LED Fade off started.");
+      fade_on = false;
+    } else {
+      ledcFadeWithInterrupt(LED_PIN, LEDC_TARGET_DUTY, LEDC_START_DUTY, LEDC_FADE_TIME, LED_FADE_ISR);
+      // Serial.println("LED Fade on started.");
+      fade_on = true;
+    }
+  }
   server.handleClient();
   ElegantOTA.loop();
 }
