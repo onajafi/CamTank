@@ -1,11 +1,3 @@
-/* LEDC Fade Arduino Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -76,8 +68,10 @@ void ARDUINO_ISR_ATTR LED_FADE_ISR() {
   fade_ended = true;
 }
 
+// Function headers
 void startCameraServer();
 void addCustomUriCallback(char* uri_str, esp_err_t custom_handler_func(httpd_req_t *req));
+
 static esp_err_t parse_get(httpd_req_t *req, char **obuf) {
   char *buf = NULL;
   size_t buf_len = 0;
@@ -162,6 +156,7 @@ void setup() {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
+  //------------------------------------
 
   sensor_t *s = esp_camera_sensor_get();
   // initial sensors are flipped vertically and colors are a bit saturated
@@ -257,11 +252,11 @@ void setup() {
   // ElegantOTA.onProgress(onOTAProgress);
   // ElegantOTA.onEnd(onOTAEnd);
 
-  // Initialize serial communication at 115200 bits per second:
-  Serial.begin(115200);
-  while (!Serial) {
-    delay(10);
-  }
+  // // Initialize serial communication at 115200 bits per second:
+  // Serial.begin(115200);
+  // while (!Serial) {
+  //   delay(10);
+  // }
 
 }
 
